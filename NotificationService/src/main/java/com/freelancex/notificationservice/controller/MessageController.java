@@ -5,8 +5,8 @@ import com.freelancex.notificationservice.service.MessageService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/messages")
+@RestController()
+@RequestMapping("/message")
 public class MessageController {
 
     private final MessageService service;
@@ -15,7 +15,7 @@ public class MessageController {
         this.service = service;
     }
 
-    @PostMapping
+    @PostMapping()
     public void sendMessage(@RequestParam String senderId,
                             @RequestParam String receiverId,
                             @RequestParam String message) {

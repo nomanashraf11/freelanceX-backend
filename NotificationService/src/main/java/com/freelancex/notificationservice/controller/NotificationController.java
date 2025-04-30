@@ -5,8 +5,8 @@ import com.freelancex.notificationservice.service.NotificationService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/notifications")
+@RestController()
+@RequestMapping("/notification")
 public class NotificationController {
 
     private final NotificationService service;
