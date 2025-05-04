@@ -1,59 +1,32 @@
 package com.freelancex.notificationservice.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
+@Data
 public class NotificationLog {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID notificationId;
 
-    private String userId;
+    @Column(nullable = false)
+    private UUID userId;
+
+    @Column(nullable = false)
+    private String type; // job_alert, payment, review, etc.
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+
+    @CreationTimestamp
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    public NotificationLog() {}
-
-    public NotificationLog(String userId, String content, LocalDateTime createdAt) {
-        this.userId = userId;
-        this.content = content;
-        this.createdAt = createdAt;
-    }
-
-    // getters and setters
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getUserId() {
-        return userId;
-    }
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-    public String getContent() {
-        return content;
-    }
-    public void setContent(String content) {
-        this.content = content;
-    }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    @Override
-    public String toString() {
-        return "NotificationLog{" +
-                "id=" + id +
-                ", userId='" + userId + '\'' +
-                ", content='" + content + '\'' +
-                ", createdAt=" + createdAt +
-                '}';
-    }
+    @Column(nullable = false)
+    private boolean isRead = false;
 }

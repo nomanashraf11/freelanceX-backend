@@ -1,30 +1,37 @@
 package com.freelancex.notificationservice.dto;
 
+import java.util.UUID;
+
 public class NotificationRequestDTO {
-    private String recipientId;
-    private String type; // e.g., "JOB_POSTED", "BID_PLACED", etc.
-    private String message;
-    private String relatedEntityId;
+    private UUID userId;
+    private String type;
+    private String content;
 
-    public NotificationRequestDTO() {}
-
-    public NotificationRequestDTO(String recipientId, String type, String message, String relatedEntityId) {
-        this.recipientId = recipientId;
-        this.type = type;
-        this.message = message;
-        this.relatedEntityId = relatedEntityId;
+    public NotificationRequestDTO() {
+        // default constructor
     }
 
-    public String getRecipientId() { return recipientId; }
-    public void setRecipientId(String recipientId) { this.recipientId = recipientId; }
+    public UUID getUserId() {
+        return userId;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
 
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
+    public String getType() {
+        return type;
+    }
 
-    public String getRelatedEntityId() { return relatedEntityId; }
-    public void setRelatedEntityId(String relatedEntityId) { this.relatedEntityId = relatedEntityId; }
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 }
-

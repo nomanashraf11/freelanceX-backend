@@ -3,20 +3,22 @@ package com.freelancex.notificationservice.controller;
 import com.freelancex.notificationservice.model.NotificationLog;
 import com.freelancex.notificationservice.service.NotificationService;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
-@RestController()
-@RequestMapping("/notification")
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/notifications")
 public class NotificationController {
 
-    private final NotificationService service;
+    private final NotificationService notificationService;
 
-    public NotificationController(NotificationService service) {
-        this.service = service;
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
     }
 
-    @GetMapping("/{userId}")
-    public List<NotificationLog> getUserNotifications(@PathVariable String userId) {
-        return service.getNotificationsForUser(userId);
+    @GetMapping("/user/{userId}")
+    public List<NotificationLog> getUserNotifications(@PathVariable UUID userId) {
+        return notificationService.getUserNotifications(userId);
     }
 }
