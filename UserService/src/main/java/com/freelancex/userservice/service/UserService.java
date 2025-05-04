@@ -7,10 +7,8 @@ import com.freelancex.userservice.jwt.interfaces.JwtService;
 import com.freelancex.userservice.model.Profile;
 import com.freelancex.userservice.model.User;
 import com.freelancex.userservice.repository.UserRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,14 +18,11 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
     }
 
     public String login(LoginRequest request) {
@@ -64,22 +59,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
-    public User getUserByEmail(String email) {
+    public User getUser(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found"));
     }
 
-    public User findById(UUID id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-    }
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    public List<User> getUsersByRole(UserRole role) {
-        return userRepository.findByRole(role);
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 }

@@ -1,55 +1,38 @@
 package com.freelancex.userservice.controller;
 
-import com.freelancex.userservice.dtos.api.CreateUserRequest;
-import com.freelancex.userservice.enums.UserRole;
 import com.freelancex.userservice.model.User;
 import com.freelancex.userservice.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
 
-    @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
+    @PostMapping
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+        System.out.println(user);
+        User createdUser = userService.createUser(user);
+        return ResponseEntity.ok(createdUser);
+    }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable UUID id) {
-        User user = userService.findById(id);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return userService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUser(email);
         return ResponseEntity.ok(user);
-    }
-
-    @GetMapping("/verify")
-    public ResponseEntity<User> verifyUser(HttpServletRequest request) {
-        String email = (String) request.getAttribute("email");
-        User user = userService.getUserByEmail(email);
-        return ResponseEntity.ok(user);
-    }
-
-    @GetMapping("/role/{role}")
-    public ResponseEntity<?> getAllUsers(@PathVariable UserRole role) {
-        return ResponseEntity.ok(userService.getUsersByRole(role));
-    }
-
-    @GetMapping("/")
-    public ResponseEntity<?> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
     }
 }

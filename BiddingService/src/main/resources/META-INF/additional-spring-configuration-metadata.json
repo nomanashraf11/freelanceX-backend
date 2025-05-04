@@ -26,8 +26,8 @@
       "description": "Description for kafka.topics.user-updated."
     },
     {
-      "name": "kafka.topics.payment-completed",
+      "name": "kafka.topics.contract-updated",
       "type": "java.lang.String",
-      "description": "Description for kafka.topics.payment-completed."
+      "description": "Description for kafka.topics.contract-updated."
     }
   ] }
