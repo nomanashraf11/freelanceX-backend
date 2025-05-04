@@ -19,7 +19,7 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @RequestMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<String> loginUser(@Valid @RequestBody LoginRequest request) {
         String token = userService.login(request);
         return ResponseEntity.ok(token);

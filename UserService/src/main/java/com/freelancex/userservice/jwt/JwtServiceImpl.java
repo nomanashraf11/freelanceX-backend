@@ -50,12 +50,8 @@ public class JwtServiceImpl implements JwtService {
                 throw new JwtException("JWT token is expired");
             }
 
-            UserRole role = (UserRole) claims.get("role");
+            String role = (String) claims.get("role");
             String email = (String) claims.get("email");
-
-            if (role == null) {
-                throw new JwtException("Role not found in token");
-            }
 
             return new JwtBody(email, role);
         } catch (ExpiredJwtException e) {

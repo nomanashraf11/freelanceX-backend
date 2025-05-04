@@ -1,7 +1,7 @@
 package com.freelancex.userservice.service;
 
-import com.freelancex.userservice.dtos.api.LoginRequest;
 import com.freelancex.userservice.dtos.api.CreateUserRequest;
+import com.freelancex.userservice.dtos.api.LoginRequest;
 import com.freelancex.userservice.enums.UserRole;
 import com.freelancex.userservice.jwt.interfaces.JwtService;
 import com.freelancex.userservice.model.Profile;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -42,18 +43,22 @@ public class UserService {
     }
 
     public User createUser(CreateUserRequest request) {
-        if (getUserByEmail(request.email()) != null) {
+        Optional<User> optionalUser = userRepository.findByEmail(request.email());
+
+        if (optionalUser.isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
 
         User user = new User();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.password()));
         user.setEmail(request.email());
+        user.setRole(UserRole.valueOf(request.role()));
 
         Profile profile = new Profile();
+        profile.setUser(user);
         profile.setFirstName(request.firstName());
         profile.setLastName(request.lastName());
-
+        profile.setBio(request.bio());
         user.setProfile(profile);
 
         return userRepository.save(user);
