@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -12,16 +13,44 @@
         <relativePath/>
     </parent>
 
+    <!-- Inherit groupId from parent; you can also explicitly set one here if you like -->
     <artifactId>ApiGateway</artifactId>
     <name>ApiGateway</name>
+
     <properties>
         <java.version>21</java.version>
+        <!-- Align this to the Spring Cloud release train you want -->
+        <spring-cloud.version>2024.0.0</spring-cloud.version>
     </properties>
-    <dependencies>
+
+    <!-- Import Spring Cloud BOM so all cloud dependencies stay in sync -->
+    <dependencyManagement>
+      <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-dependencies</artifactId>
+          <version>${spring-cloud.version}</version>
+          <type>pom</type>
+          <scope>import</scope>
         </dependency>
+      </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Spring Cloud Gateway -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+
+        <!-- Eureka Client (for service discovery) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+
+        <!-- Validation, Lombok, Testing (as before) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>

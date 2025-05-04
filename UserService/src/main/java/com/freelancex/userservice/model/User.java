@@ -1,7 +1,5 @@
 package com.freelancex.userservice.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.freelancex.userservice.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +8,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -18,35 +15,31 @@ import java.util.UUID;
 @Getter
 public class User {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @Column(name = "user_id", updatable = false, nullable = false)
-    private UUID userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Setter
-    @Column(nullable = false, unique = true)
+    @NotBlank(message = "Name is required")
+    private String name;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
+    @Column(unique = true)
     private String email;
 
-    @Setter
-    @Column(nullable = false)
+    @NotBlank(message = "Password is required")
     private String password;
 
-    @Setter
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role = UserRole.FREELANCER;
+    private Role role = Role.FREELANCER;
 
-    @Setter
-    @CreatedDate
-    @Column(updatable = false, nullable = false)
+    @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @Setter
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
-    @Setter
-    @JsonManagedReference
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
+
+    public enum Role {
+        FREELANCER, CLIENT, ADMIN
+    }
 }

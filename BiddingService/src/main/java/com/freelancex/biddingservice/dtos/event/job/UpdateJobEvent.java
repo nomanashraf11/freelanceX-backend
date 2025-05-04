@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record UpdateJobEvent(
-        @NotNull UUID jobId, @NotNull UUID clientId, @NotNull JobStatus status,
+        @NotNull UUID jobId, @NotNull UUID userId, @NotNull JobStatus status,
         @NotNull @Positive Double budget,
         @NotBlank @Size(max = 255) String title) {
 }

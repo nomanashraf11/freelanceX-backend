@@ -1,8 +1,6 @@
 package com.freelancex.biddingservice.models;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.freelancex.biddingservice.enums.ContractStatus;
-import com.freelancex.biddingservice.views.Views;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,47 +22,31 @@ public class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "contract_id", updatable = false, nullable = false)
-    @JsonView({Views.BaseView.class})
     private UUID contractId;
 
     @Setter
-    @Column(name = "bid_id", unique = true, nullable = false)
-    @JsonView({Views.BaseView.class})
+    @Column(name = "bid_id", nullable = false)
     private UUID bidId;
 
     @Setter
-    @Column(name = "job_id", unique = true, nullable = false)
-    @JsonView({Views.BaseView.class})
-    private UUID jobId;
-
-    @OneToOne
-    @JoinColumn(name = "bid_id", insertable = false, updatable = false)
-    @JsonView({Views.ClientContractView.class, Views.FreelancerContractView.class})
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bid_id", referencedColumnName = "bid_id", unique = true, insertable = false, updatable = false)
     private Bid bid;
-
-    @OneToOne
-    @JoinColumn(name = "job_id", insertable = false, updatable = false)
-    @JsonView({Views.ClientContractView.class, Views.FreelancerContractView.class})
-    private Job job;
 
     @Setter
     @Column(nullable = false, length = 500)
-    @JsonView({Views.BaseView.class})
     private String terms;
 
     @Setter
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    @JsonView({Views.BaseView.class})
     private ContractStatus status = ContractStatus.ACTIVE;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false, nullable = false, columnDefinition = "TIMESTAMPTZ")
-    @JsonView({Views.BaseView.class})
     private LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
-    @JsonView({Views.BaseView.class})
     private LocalDateTime updatedAt;
 }

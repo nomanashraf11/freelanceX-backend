@@ -1,18 +1,12 @@
 package com.freelancex.biddingservice.services;
 
-import com.freelancex.biddingservice.dtos.api.contract.CreateContractRequest;
-import com.freelancex.biddingservice.dtos.api.contract.UpdateContractRequest;
-import com.freelancex.biddingservice.dtos.event.contract.CreateContractEvent;
-import com.freelancex.biddingservice.dtos.event.payment.CompletePaymentEvent;
+import com.freelancex.biddingservice.dtos.api.contract.*;
 import com.freelancex.biddingservice.exceptions.ApiException;
-import com.freelancex.biddingservice.kafka.interfaces.KafkaProducerService;
 import com.freelancex.biddingservice.models.Bid;
 import com.freelancex.biddingservice.models.Contract;
 import com.freelancex.biddingservice.repositories.ContractRepository;
-import com.freelancex.biddingservice.services.interfaces.BidService;
 import com.freelancex.biddingservice.services.interfaces.ContractService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,92 +17,76 @@ import java.util.UUID;
 
 @Service
 public class ContractServiceImpl implements ContractService {
-    private final static Logger logger = LoggerFactory.getLogger(ContractServiceImpl.class);
     private final ContractRepository contractRepository;
-    private final BidService bidService;
-    private final KafkaProducerService kafkaProducerService;
+    private final EntityManager entityManager;
 
     @Autowired
-    public ContractServiceImpl(ContractRepository contractRepository, BidService bidService,
-                               KafkaProducerService kafkaProducerService) {
+    public ContractServiceImpl(ContractRepository contractRepository, EntityManager entityManager) {
         this.contractRepository = contractRepository;
-        this.bidService = bidService;
-        this.kafkaProducerService = kafkaProducerService;
+        this.entityManager = entityManager;
+    }
+
+
+    @Override
+    public GetContractsResponse getAllContracts() throws ApiException {
+        List<Contract> contracts = contractRepository.findAll();
+
+        GetContractsResponse response = new GetContractsResponse(contracts);
+        response.setMessage("success");
+        response.setStatusCode(200);
+
+        return response;
     }
 
     @Override
-    public List<Contract> getContractsByFreelancerId(UUID freelancerId) {
-
-        return contractRepository.findByBidFreelancerId(freelancerId);
-    }
-
-    @Override
-    public List<Contract> getContractsByClientId(UUID clientId) {
-
-        return contractRepository.findByJobClientId(clientId);
-    }
-
-    @Override
-    public Contract getContractByClientId(UUID contractId, UUID clientId) throws ApiException {
-        Optional<Contract> contract = contractRepository.findByContractIdAndJobClientId(contractId,
-                clientId);
+    public GetContractResponse getContractById(UUID id) throws ApiException {
+        Optional<Contract> contract = contractRepository.findById(id);
 
         if (contract.isEmpty()) {
-            throw new ApiException("Contract not found", HttpStatus.NOT_FOUND);
+            throw new ApiException(String.format("Contract:%s not found", id), HttpStatus.NOT_FOUND);
         }
 
-        return contract.get();
+        GetContractResponse response = new GetContractResponse(contract.get());
+        response.setMessage("success");
+        response.setStatusCode(200);
+
+        return response;
     }
 
     @Override
-    public void createContract(CreateContractRequest request) throws ApiException {
-        Optional<Contract> existingContract = contractRepository.findByJobIdOrBidId(request.getJobId(),
-                request.getBidId());
-
-        if (existingContract.isPresent()) {
-            throw new ApiException("Contract already exists", HttpStatus.CONFLICT);
-        }
-
+    public CreateContractResponse createContract(CreateContractRequest request) {
         Contract contract = new Contract();
-        contract.setBidId(request.getBidId());
-        contract.setJobId(request.getJobId());
+
         contract.setTerms(request.getTerms());
+        contract.setBid(entityManager.getReference(Bid.class, request.getBidId()));
 
-        Contract savedContract = contractRepository.save(contract);
+        contractRepository.save(contract);
 
-        Bid bid = bidService.getBidById(request.getBidId());
+        CreateContractResponse response = new CreateContractResponse();
+        response.setMessage("success");
+        response.setStatusCode(201);
 
-        CreateContractEvent event = new CreateContractEvent(bid.getFreelancerId(),
-                savedContract.getContractId(), bid.getAmount(),
-                savedContract.getStatus());
-        this.kafkaProducerService.sendContractCreatedEvent(event);
+        return response;
     }
 
     @Override
-    public void updateContractTerms(UUID contractId, UUID clientId,
-                                                      UpdateContractRequest request) throws ApiException {
-        Optional<Contract> contract = contractRepository.findByContractIdAndJobClientId(contractId,
-                clientId);
+    public UpdateContractResponse updateContract(UUID id, UpdateContractRequest request) throws ApiException {
+        Optional<Contract> contract = contractRepository.findById(id);
 
         if (contract.isEmpty()) {
-            throw new ApiException("Contract not found", HttpStatus.NOT_FOUND);
+            throw new ApiException(String.format("Contract:%s not found", id), HttpStatus.NOT_FOUND);
         }
 
         Contract contractToUpdate = contract.get();
         contractToUpdate.setTerms(request.getTerms());
+        contractToUpdate.setStatus(request.getStatus());
+
         contractRepository.save(contractToUpdate);
-    }
 
-    @Override
-    public void updateContractStatus(CompletePaymentEvent event) {
-        Optional<Contract> contract = contractRepository.findById(event.contractId());
+        UpdateContractResponse response = new UpdateContractResponse();
+        response.setMessage("success");
+        response.setStatusCode(200);
 
-        if (contract.isPresent()) {
-            Contract contractToUpdate = contract.get();
-            contractToUpdate.setStatus(event.status());
-            contractRepository.save(contractToUpdate);
-
-            logger.info("Contract: {} status updated successfully", event.contractId());
-        }
+        return response;
     }
 }

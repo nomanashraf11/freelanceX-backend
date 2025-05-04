@@ -7,7 +7,6 @@ import java.util.UUID;
 public record CreateContractEvent(
         UUID userId,
         UUID contractId,
-        Double amount,
         ContractStatus status
 ) {
 }
